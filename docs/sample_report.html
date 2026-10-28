@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>dqcheck — Data Quality Report</title>
+<style>
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        background: #f8fafc;
+        color: #0f172a;
+        line-height: 1.5;
+        padding: 2.5rem 1.5rem;
+        max-width: 960px;
+        margin: 0 auto;
+    }
+    h1 { font-size: 1.75rem; font-weight: 700; color: #0f172a; letter-spacing: -0.025em; }
+    h2 { font-size: 1.25rem; font-weight: 600; margin: 1.25rem 0 0.5rem; color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.35rem; }
+    h3 { font-size: 1rem; font-weight: 600; margin: 0.75rem 0 0.25rem; color: #1e293b; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; background: #f1f5f9; padding: 0.15rem 0.35rem; border-radius: 4px; font-size: 0.875rem; color: #0f172a; }
+    .card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.25rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .score-container {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        margin: 1rem 0;
+    }
+    .score-box {
+        font-size: 2.25rem;
+        font-weight: 800;
+        padding: 0.35rem 1.25rem;
+        border-radius: 8px;
+        letter-spacing: -0.025em;
+    }
+    .score-good { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+    .score-ok   { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+    .score-bad  { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+    .score-meta { font-size: 1.1rem; color: #334155; }
+    .badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        margin-right: 0.5rem;
+        vertical-align: middle;
+    }
+    .badge-high   { background: #fee2e2; color: #991b1b; border: 1px solid #f87171; }
+    .badge-medium { background: #fef3c7; color: #92400e; border: 1px solid #fbbf24; }
+    .badge-low    { background: #dcfce7; color: #166534; border: 1px solid #4ade80; }
+    .badge-info   { background: #e0f2fe; color: #075985; border: 1px solid #7dd3fc; }
+    .summary-table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.9rem; }
+    .summary-table th, .summary-table td {
+        padding: 0.5rem 0.75rem;
+        text-align: left;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .summary-table th { background: #f8fafc; font-weight: 600; color: #475569; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #cbd5e1; }
+    .finding-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-left: 4px solid #94a3b8;
+        padding: 0.85rem 1rem;
+        margin: 0.6rem 0;
+        border-radius: 0 6px 6px 0;
+    }
+    .finding-card.high   { border-left-color: #ef4444; background: #fffdfd; }
+    .finding-card.medium { border-left-color: #f59e0b; background: #fffdfa; }
+    .finding-card.low    { border-left-color: #10b981; background: #fafdfb; }
+    .finding-card.info   { border-left-color: #3b82f6; background: #fafdff; }
+    .meta { color: #64748b; font-size: 0.875rem; margin-top: 0.25rem; }
+    .footer { text-align: center; color: #94a3b8; font-size: 0.8rem; margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid #e2e8f0; }
+    
+</style>
+</head>
+<body>
+
+    <div class="card">
+        <h1>dqcheck — Data Quality Report</h1>
+        <div class="score-container">
+            <div class="score-box score-ok">48/100</div>
+            <div class="score-meta">
+                <strong>Rating: Poor</strong>
+                <p class="meta">Health score formula: start at 100, deduct 10 per high, 3 per medium, 1 per low finding. Min 0.</p>
+            </div>
+        </div>
+        <table class="summary-table">
+            <thead>
+                <tr><th>Severity</th><th>Findings Count</th></tr>
+            </thead>
+            <tbody>
+                <tr><td><span class="badge badge-high">HIGH</span></td><td>4</td></tr>
+                <tr><td><span class="badge badge-medium">MEDIUM</span></td><td>3</td></tr>
+                <tr><td><span class="badge badge-low">LOW</span></td><td>3</td></tr>
+                <tr><td><span class="badge badge-info">INFO</span></td><td>0</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <h2>Dataset Info</h2>
+        <p class="meta" style="margin-bottom:0.75rem;">
+            <strong>Target:</strong> <code>sample_data/messy_sample.csv</code> &nbsp;|&nbsp;
+            <strong>Rows:</strong> 200 &nbsp;|&nbsp;
+            <strong>Columns:</strong> 12
+        </p>
+        <table class="summary-table">
+            <thead>
+                <tr><th>Column Name</th><th>Detected Dtype</th></tr>
+            </thead>
+            <tbody>
+                <tr><td><code>id</code></td><td><code>int64</code></td></tr>
+<tr><td><code>customer_id</code></td><td><code>str</code></td></tr>
+<tr><td><code>name</code></td><td><code>str</code></td></tr>
+<tr><td><code>age</code></td><td><code>str</code></td></tr>
+<tr><td><code>salary</code></td><td><code>int64</code></td></tr>
+<tr><td><code>score</code></td><td><code>float64</code></td></tr>
+<tr><td><code>city</code></td><td><code>str</code></td></tr>
+<tr><td><code>signup_date</code></td><td><code>str</code></td></tr>
+<tr><td><code>notes</code></td><td><code>str</code></td></tr>
+<tr><td><code>constant_col</code></td><td><code>str</code></td></tr>
+<tr><td><code>price</code></td><td><code>str</code></td></tr>
+<tr><td><code>discount_pct</code></td><td><code>str</code></td></tr>
+
+            </tbody>
+        </table>
+        <h3 style='margin-top:1rem;color:#b45309;'>Dtype Warnings</h3><ul><li style='margin:0.25rem 0;'><code>age</code>: stored as <code>object</code>, likely <code>numeric</code>. Examples: ['28', '35', '42']</li><li style='margin:0.25rem 0;'><code>signup_date</code>: stored as <code>object</code>, likely <code>date</code>. Examples: ['2024-01-15', '2024-02-20', '2024-03-10']</li><li style='margin:0.25rem 0;'><code>price</code>: stored as <code>object</code>, likely <code>numeric</code>. Examples: ['$1200', '$2,500', '$800']</li><li style='margin:0.25rem 0;'><code>discount_pct</code>: stored as <code>object</code>, likely <code>numeric</code>. Examples: ['10%', '15%', '5%']</li></ul>
+    </div>
+
+    <div class="card">
+        <h2>Missing Values</h2>
+        <p class="meta">Found missing values in 3/12 columns (1 high, 0 medium, 2 low severity).</p>
+        
+            <div class="finding-card low">
+                <h3><span class="badge badge-low">LOW</span> name</h3>
+                <p class="meta">Check: <strong>missing</strong>
+                &nbsp;|&nbsp; Metric: <code>1/200 (0.5%)</code></p>
+                <p style="margin-top:0.4rem;">Column 'name' has 1 missing values (0.5% of 200 rows).   All 1 are hidden missing values (sentinel strings like '?', 'N/A', etc.).</p>
+            </div>
+            <div class="finding-card low">
+                <h3><span class="badge badge-low">LOW</span> age</h3>
+                <p class="meta">Check: <strong>missing</strong>
+                &nbsp;|&nbsp; Metric: <code>1/200 (0.5%)</code></p>
+                <p style="margin-top:0.4rem;">Column 'age' has 1 missing values (0.5% of 200 rows).   All 1 are hidden missing values (sentinel strings like '?', 'N/A', etc.).</p>
+            </div>
+            <div class="finding-card high">
+                <h3><span class="badge badge-high">HIGH</span> notes</h3>
+                <p class="meta">Check: <strong>missing</strong>
+                &nbsp;|&nbsp; Metric: <code>186/200 (93.0%)</code></p>
+                <p style="margin-top:0.4rem;">Column 'notes' has 186 missing values (93.0% of 200 rows).   181 are standard NaN/None, and 5 are hidden missing values (sentinel strings like '?', 'N/A', etc.).   Consider dropping this column — over half the values are missing, which may make imputation unreliable.</p>
+            </div>
+    </div>
+
+    <div class="card">
+        <h2>Duplicate Rows</h2>
+        <p class="meta">Duplicate issues found: 4/200 (2.0%).</p>
+        
+            <div class="finding-card high">
+                <h3><span class="badge badge-high">HIGH</span> customer_id</h3>
+                <p class="meta">Check: <strong>duplicates (key)</strong>
+                &nbsp;|&nbsp; Metric: <code>4/200 (2.0%)</code></p>
+                <p style="margin-top:0.4rem;">Found 4 rows (2.0%) sharing the same key (customer_id), and 2 key groups have conflicting values in other columns. This suggests data integrity issues — the same entity has different recorded values.</p>
+            </div>
+    </div>
+
+    <div class="card">
+        <h2>Outliers</h2>
+        <p class="meta">Found outliers in 2/3 numeric columns (method: iqr).</p>
+        
+            <div class="finding-card medium">
+                <h3><span class="badge badge-medium">MEDIUM</span> salary</h3>
+                <p class="meta">Check: <strong>outliers</strong>
+                &nbsp;|&nbsp; Metric: <code>3/200 (1.5%)</code></p>
+                <p style="margin-top:0.4rem;">Column 'salary': 3 values (1.5%) are outside the IQR bounds [26500.00, 102500.00]. Actual range: [38000.0, 500000.0]. Note: outliers are not necessarily errors — they may be legitimate extreme values. Investigate before deciding whether to transform or keep them.</p>
+            </div>
+            <div class="finding-card low">
+                <h3><span class="badge badge-low">LOW</span> score</h3>
+                <p class="meta">Check: <strong>outliers</strong>
+                &nbsp;|&nbsp; Metric: <code>1/200 (0.5%)</code></p>
+                <p style="margin-top:0.4rem;">Column 'score': 1 values (0.5%) are outside the IQR bounds [58.36, 104.06]. Actual range: [55.3, 95.1]. Note: outliers are not necessarily errors — they may be legitimate extreme values. Investigate before deciding whether to transform or keep them.</p>
+            </div>
+    </div>
+
+    <div class="card">
+        <h2>Skewness</h2>
+        <p class="meta">Found skewed distributions in 1/3 numeric columns (1 high, 0 medium).</p>
+        
+            <div class="finding-card high">
+                <h3><span class="badge badge-high">HIGH</span> salary</h3>
+                <p class="meta">Check: <strong>skewness</strong>
+                &nbsp;|&nbsp; Metric: <code>skew=10.85</code></p>
+                <p style="margin-top:0.4rem;">Column 'salary' is right (positive)-skewed (skew=10.85). Mean=6.674e+04, Median=6.35e+04 (gap=3240). Since all values are positive, a log transform may help reduce skewness before modelling.</p>
+            </div>
+    </div>
+
+    <div class="card">
+        <h2>Correlation</h2>
+        <p class="meta">No highly correlated pairs found among 3 numeric columns (threshold: |r| &gt; 0.9).</p>
+        <p style='color:#16a34a;font-size:0.9rem;margin-top:0.5rem;'>No issues detected for this check.</p>
+    </div>
+
+    <div class="card">
+        <h2>Structure (Constant &amp; ID-like Columns)</h2>
+        <p class="meta">Found 1 constant column(s) and 2 ID-like column(s).</p>
+        
+            <div class="finding-card medium">
+                <h3><span class="badge badge-medium">MEDIUM</span> id</h3>
+                <p class="meta">Check: <strong>structure</strong>
+                &nbsp;|&nbsp; Metric: <code>uniqueness=100.0%</code></p>
+                <p style="margin-top:0.4rem;">Column 'id' looks like an identifier (200/200 unique values = 100.0%). ID columns should not be used as features — a model cannot generalise from unique identifiers. Use it for joins or lookups only.</p>
+            </div>
+            <div class="finding-card medium">
+                <h3><span class="badge badge-medium">MEDIUM</span> customer_id</h3>
+                <p class="meta">Check: <strong>structure</strong>
+                &nbsp;|&nbsp; Metric: <code>uniqueness=99.0%</code></p>
+                <p style="margin-top:0.4rem;">Column 'customer_id' looks like an identifier (198/200 unique values = 99.0%). ID columns should not be used as features — a model cannot generalise from unique identifiers. Use it for joins or lookups only.</p>
+            </div>
+            <div class="finding-card high">
+                <h3><span class="badge badge-high">HIGH</span> constant_col</h3>
+                <p class="meta">Check: <strong>structure</strong>
+                &nbsp;|&nbsp; Metric: <code>nunique=1</code></p>
+                <p style="margin-top:0.4rem;">Column 'constant_col' has only one unique value — it is constant. A constant column carries zero information and will not help any model learn patterns. Consider dropping it.</p>
+            </div>
+    </div>
+
+    <div class="footer">
+        <p>Generated by dqcheck. This report flags potential issues —
+        not all findings are errors. Always apply domain knowledge
+        before making data decisions.</p>
+    </div>
+</body>
+</html>

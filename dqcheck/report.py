@@ -107,16 +107,16 @@ def _md_header(report: ReportData) -> str:
     grade = _score_to_grade(score)
 
     lines = [
-        "# 📊 dqcheck — Data Quality Report",
+        "# dqcheck — Data Quality Report",
         "",
         f"**Health Score: {score}/100 ({grade})**",
         "",
-        f"| Severity | Count |",
-        f"|----------|-------|",
-        f"| 🔴 High   | {report.high_count}     |",
-        f"| 🟡 Medium | {report.medium_count}     |",
-        f"| 🟢 Low    | {report.low_count}     |",
-        f"| ℹ️ Info   | {report.info_count}     |",
+        "| Severity | Count |",
+        "|----------|-------|",
+        f"| HIGH     | {report.high_count}     |",
+        f"| MEDIUM   | {report.medium_count}     |",
+        f"| LOW      | {report.low_count}     |",
+        f"| INFO     | {report.info_count}     |",
         "",
         "_Health score formula: start at 100, deduct 10 per high, "
         "3 per medium, 1 per low finding. Min 0._",
@@ -142,7 +142,7 @@ def _md_dataset_info(info: DatasetInfo) -> str:
 
     if info.dtype_warnings:
         lines.append("")
-        lines.append("### ⚠️ Dtype Warnings")
+        lines.append("### Dtype Warnings")
         lines.append("")
         for warning in info.dtype_warnings:
             lines.append(
@@ -162,7 +162,7 @@ def _md_check_section(cr: CheckResult) -> str:
     ]
 
     if not cr.findings:
-        lines.append("\nNo issues found. ✅")
+        lines.append("\nNo issues found.")
         return "\n".join(lines)
 
     lines.append("")
@@ -180,14 +180,8 @@ def _md_check_section(cr: CheckResult) -> str:
 
 
 def _severity_badge_md(severity: str) -> str:
-    """Return an emoji badge for the severity level."""
-    badges = {
-        SEVERITY_HIGH: "🔴",
-        SEVERITY_MEDIUM: "🟡",
-        SEVERITY_LOW: "🟢",
-        SEVERITY_INFO: "ℹ️",
-    }
-    return badges.get(severity, "❓")
+    """Return a plain-text severity badge for Markdown."""
+    return f"[{severity.upper()}]"
 
 
 def _md_footer() -> str:
@@ -237,81 +231,83 @@ def build_html_report(report: ReportData) -> str:
 
 
 def _html_css() -> str:
-    """Inline CSS for the HTML report.
-
-    Uses a clean design with:
-    - A neutral background and dark text for readability.
-    - Colour-coded severity badges (red, amber, green, blue).
-    - Card-like sections with subtle shadows.
-    """
+    """Inline CSS for the HTML report."""
     return """
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-                     "Helvetica Neue", Arial, sans-serif;
-        background: #f5f6fa;
-        color: #2d3436;
-        line-height: 1.6;
-        padding: 2rem;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        background: #f8fafc;
+        color: #0f172a;
+        line-height: 1.5;
+        padding: 2.5rem 1.5rem;
         max-width: 960px;
         margin: 0 auto;
     }
-    h1 { font-size: 1.8rem; margin-bottom: 0.5rem; color: #2d3436; }
-    h2 { font-size: 1.3rem; margin: 1.5rem 0 0.5rem; color: #2d3436;
-         border-bottom: 2px solid #dfe6e9; padding-bottom: 0.3rem; }
-    h3 { font-size: 1.05rem; margin: 1rem 0 0.3rem; }
+    h1 { font-size: 1.75rem; font-weight: 700; color: #0f172a; letter-spacing: -0.025em; }
+    h2 { font-size: 1.25rem; font-weight: 600; margin: 1.25rem 0 0.5rem; color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.35rem; }
+    h3 { font-size: 1rem; font-weight: 600; margin: 0.75rem 0 0.25rem; color: #1e293b; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; background: #f1f5f9; padding: 0.15rem 0.35rem; border-radius: 4px; font-size: 0.875rem; color: #0f172a; }
     .card {
-        background: white;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
         border-radius: 8px;
         padding: 1.5rem;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        margin-bottom: 1.25rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .score-container {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        margin: 1rem 0;
     }
     .score-box {
-        display: inline-block;
-        font-size: 2.5rem;
-        font-weight: bold;
-        padding: 0.5rem 1.5rem;
-        border-radius: 12px;
-        margin: 0.5rem 0 1rem;
+        font-size: 2.25rem;
+        font-weight: 800;
+        padding: 0.35rem 1.25rem;
+        border-radius: 8px;
+        letter-spacing: -0.025em;
     }
-    .score-good { background: #00b894; color: white; }
-    .score-ok   { background: #fdcb6e; color: #2d3436; }
-    .score-bad  { background: #d63031; color: white; }
+    .score-good { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+    .score-ok   { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+    .score-bad  { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+    .score-meta { font-size: 1.1rem; color: #334155; }
     .badge {
         display: inline-block;
-        padding: 2px 10px;
-        border-radius: 12px;
-        font-size: 0.8rem;
-        font-weight: 600;
-        color: white;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
         margin-right: 0.5rem;
         vertical-align: middle;
     }
-    .badge-high   { background: #d63031; }
-    .badge-medium { background: #e17055; }
-    .badge-low    { background: #00b894; }
-    .badge-info   { background: #0984e3; }
-    .summary-table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; }
+    .badge-high   { background: #fee2e2; color: #991b1b; border: 1px solid #f87171; }
+    .badge-medium { background: #fef3c7; color: #92400e; border: 1px solid #fbbf24; }
+    .badge-low    { background: #dcfce7; color: #166534; border: 1px solid #4ade80; }
+    .badge-info   { background: #e0f2fe; color: #075985; border: 1px solid #7dd3fc; }
+    .summary-table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.9rem; }
     .summary-table th, .summary-table td {
-        padding: 0.4rem 0.8rem;
+        padding: 0.5rem 0.75rem;
         text-align: left;
-        border-bottom: 1px solid #dfe6e9;
+        border-bottom: 1px solid #f1f5f9;
     }
-    .summary-table th { background: #dfe6e9; font-weight: 600; }
+    .summary-table th { background: #f8fafc; font-weight: 600; color: #475569; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #cbd5e1; }
     .finding-card {
-        background: #fafafa;
-        border-left: 4px solid #dfe6e9;
-        padding: 0.8rem 1rem;
-        margin: 0.5rem 0;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-left: 4px solid #94a3b8;
+        padding: 0.85rem 1rem;
+        margin: 0.6rem 0;
         border-radius: 0 6px 6px 0;
     }
-    .finding-card.high   { border-left-color: #d63031; }
-    .finding-card.medium { border-left-color: #e17055; }
-    .finding-card.low    { border-left-color: #00b894; }
-    .finding-card.info   { border-left-color: #0984e3; }
-    .meta { color: #636e72; font-size: 0.9rem; }
-    .footer { text-align: center; color: #b2bec3; font-size: 0.85rem; margin-top: 2rem; }
+    .finding-card.high   { border-left-color: #ef4444; background: #fffdfd; }
+    .finding-card.medium { border-left-color: #f59e0b; background: #fffdfa; }
+    .finding-card.low    { border-left-color: #10b981; background: #fafdfb; }
+    .finding-card.info   { border-left-color: #3b82f6; background: #fafdff; }
+    .meta { color: #64748b; font-size: 0.875rem; margin-top: 0.25rem; }
+    .footer { text-align: center; color: #94a3b8; font-size: 0.8rem; margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid #e2e8f0; }
     """
 
 
@@ -342,18 +338,25 @@ def _html_header(report: ReportData) -> str:
 
     return f"""
     <div class="card">
-        <h1>&#128202; dqcheck — Data Quality Report</h1>
-        <div class="score-box {score_class}">{score}/100</div>
-        <p><strong>Grade: {grade}</strong></p>
+        <h1>dqcheck — Data Quality Report</h1>
+        <div class="score-container">
+            <div class="score-box {score_class}">{score}/100</div>
+            <div class="score-meta">
+                <strong>Rating: {grade}</strong>
+                <p class="meta">Health score formula: start at 100, deduct 10 per high, 3 per medium, 1 per low finding. Min 0.</p>
+            </div>
+        </div>
         <table class="summary-table">
-            <tr><th>Severity</th><th>Count</th></tr>
-            <tr><td><span class="badge badge-high">HIGH</span></td><td>{report.high_count}</td></tr>
-            <tr><td><span class="badge badge-medium">MEDIUM</span></td><td>{report.medium_count}</td></tr>
-            <tr><td><span class="badge badge-low">LOW</span></td><td>{report.low_count}</td></tr>
-            <tr><td><span class="badge badge-info">INFO</span></td><td>{report.info_count}</td></tr>
+            <thead>
+                <tr><th>Severity</th><th>Findings Count</th></tr>
+            </thead>
+            <tbody>
+                <tr><td><span class="badge badge-high">HIGH</span></td><td>{report.high_count}</td></tr>
+                <tr><td><span class="badge badge-medium">MEDIUM</span></td><td>{report.medium_count}</td></tr>
+                <tr><td><span class="badge badge-low">LOW</span></td><td>{report.low_count}</td></tr>
+                <tr><td><span class="badge badge-info">INFO</span></td><td>{report.info_count}</td></tr>
+            </tbody>
         </table>
-        <p class="meta">Health score formula: start at 100, deduct 10 per high,
-        3 per medium, 1 per low finding. Min 0.</p>
     </div>"""
 
 
@@ -361,14 +364,14 @@ def _html_dataset_info(info: DatasetInfo) -> str:
     """HTML card with dataset metadata."""
     rows = ""
     for col, dtype in info.dtypes.items():
-        rows += f"<tr><td>{_html_escape(col)}</td><td>{dtype}</td></tr>\n"
+        rows += f"<tr><td><code>{_html_escape(col)}</code></td><td><code>{dtype}</code></td></tr>\n"
 
     warnings_html = ""
     if info.dtype_warnings:
-        warnings_html = "<h3>⚠️ Dtype Warnings</h3><ul>"
+        warnings_html = "<h3 style='margin-top:1rem;color:#b45309;'>Dtype Warnings</h3><ul>"
         for w in info.dtype_warnings:
             warnings_html += (
-                f"<li><strong>{_html_escape(w.column)}</strong>: "
+                f"<li style='margin:0.25rem 0;'><code>{_html_escape(w.column)}</code>: "
                 f"stored as <code>{w.current_dtype}</code>, "
                 f"likely <code>{w.likely_dtype}</code>. "
                 f"{_html_escape(w.evidence)}</li>"
@@ -378,12 +381,18 @@ def _html_dataset_info(info: DatasetInfo) -> str:
     return f"""
     <div class="card">
         <h2>Dataset Info</h2>
-        <p><strong>File:</strong> <code>{_html_escape(info.file_path)}</code></p>
-        <p><strong>Rows:</strong> {info.row_count:,} &nbsp;|&nbsp;
-           <strong>Columns:</strong> {info.column_count}</p>
+        <p class="meta" style="margin-bottom:0.75rem;">
+            <strong>Target:</strong> <code>{_html_escape(info.file_path)}</code> &nbsp;|&nbsp;
+            <strong>Rows:</strong> {info.row_count:,} &nbsp;|&nbsp;
+            <strong>Columns:</strong> {info.column_count}
+        </p>
         <table class="summary-table">
-            <tr><th>Column</th><th>Dtype</th></tr>
-            {rows}
+            <thead>
+                <tr><th>Column Name</th><th>Detected Dtype</th></tr>
+            </thead>
+            <tbody>
+                {rows}
+            </tbody>
         </table>
         {warnings_html}
     </div>"""
@@ -394,7 +403,7 @@ def _html_check_section(cr: CheckResult) -> str:
     findings_html = ""
 
     if not cr.findings:
-        findings_html = "<p>No issues found. ✅</p>"
+        findings_html = "<p style='color:#16a34a;font-size:0.9rem;margin-top:0.5rem;'>No issues detected for this check.</p>"
     else:
         for finding in cr.findings:
             badge = _severity_badge_html(finding.severity)
@@ -402,9 +411,9 @@ def _html_check_section(cr: CheckResult) -> str:
             findings_html += f"""
             <div class="finding-card {css_class}">
                 <h3>{badge} {_html_escape(finding.column)}</h3>
-                <p class="meta">Check: {_html_escape(finding.check)}
-                &nbsp;|&nbsp; Metric: {_html_escape(finding.metric)}</p>
-                <p>{_html_escape(finding.message)}</p>
+                <p class="meta">Check: <strong>{_html_escape(finding.check)}</strong>
+                &nbsp;|&nbsp; Metric: <code>{_html_escape(finding.metric)}</code></p>
+                <p style="margin-top:0.4rem;">{_html_escape(finding.message)}</p>
             </div>"""
 
     return f"""
